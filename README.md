@@ -1,4 +1,5 @@
-# Stale Bot PR Notifier
+# stale-bot-pr-notifier
+Github Action to notify stale PRs from dependabot/renovate to the slack channel.
 
 ## Overview
 The **Stale Bot PR Notifier** is a GitHub Action designed to notify a Slack channel when pull requests from Dependabot and Renovate have become stale based on a specified timeframe. This action is useful for teams that want to keep track of aging PRs to ensure they are reviewed and merged in a timely manner.
