@@ -1,0 +1,29 @@
+name: Stale PR Reporter
+description: GitHub Action reports to Slack about pull requests from Dependabot and Renovate that have become stale.
+
+inputs:
+  pr_age_in_hours:
+    description: Total number of hours since the Pull Request (PR) was opened. Default value is 48 hours
+    required: false
+    default: 48
+  slack_webhook_url:
+    description: The Slack webhook URL used to send messages to a Slack. This URL is provided by Slack when you create a new incoming webhook in your Slack workflows. Ensure this URL is kept secure.
+    required: true
+runs:
+  using: composite
+
+  steps:
+    - name: Fetch all the open PR's from dependabot/renovate
+      env:
+        repository: ${{ github.repository }}
+        pr_age_in_hours: ${{inputs.pr_age_in_hours}}
+      shell: bash
+      run: |
+        bash ${{ github.action_path }}/bin/script.sh
+    - name: Report to Slack
+      if: ${{ env.PR_LIST != '' }}
+      uses: slackapi/slack-github-action@v1
+      with:
+        payload-file-path: payload.json
+      env:
+        SLACK_WEBHOOK_URL: ${{ inputs.slack_webhook_url }}
