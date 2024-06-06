@@ -2,13 +2,10 @@ on:
   push
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: 3.3
       - uses: ./
         with:
           pr_age_in_hours: 24

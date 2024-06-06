@@ -1,12 +1,12 @@
-# stale-bot-pr-notifier
-Github Action to notify stale PRs from dependabot/renovate to the slack channel.
+# Stale PR Reporter
+Github Action to report stale PRs from dependabot/renovate to the slack channel.
 
 ## Overview
-The **Stale Bot PR Notifier** is a GitHub Action designed to notify a Slack channel when pull requests from Dependabot and Renovate have become stale based on a specified timeframe. This action is useful for teams that want to keep track of aging PRs to ensure they are reviewed and merged in a timely manner.
+The **Stale PR Reporter** is a GitHub Action designed to report Slack when pull requests from Dependabot and Renovate have become stale based on a specified timeframe. This action is useful for teams that want to keep track of aging PRs to ensure they are reviewed and merged in a timely manner.
 
 ## Features
 - Checks for open pull requests from Dependabot and Renovate.
-- Notifies a Slack channel if these PRs have been open longer than a specified number of hours.
+- Reports to Slack if these PRs have been open longer than a specified number of hours (default: 48 hours).
 - Configurable threshold for PR staleness.
 
 ## Inputs
@@ -26,14 +26,15 @@ The **Stale Bot PR Notifier** is a GitHub Action designed to notify a Slack chan
 1. **Create a Slack Webhook**:
    - Navigate to your Slack App settings and create a new incoming webhook.
    - Copy the webhook URL which will be used to send notifications from this action.
+   - Add the webhook secret to SecretsManager
 
 2. **Add the GitHub Action to Your Repository**:
    - Create a directory `.github/workflows` in your repository if it doesn't already exist.
-   - Add a new YAML file in this directory for the workflow, e.g., `stale-pr-notifier.yml`.
+   - Add a new YAML file in this directory for the workflow, e.g., `stale-pr-reporter.yml`.
 
 ### Example Workflow File
-Create a file named `.github/workflows/stale-pr-notifier.yml` and add the following content:
-yaml name: Stale Bot PR Notifier
+Create a file named `.github/workflows/stale-pr-reporter.yml` and add the following content:
+yaml name: Stale PR Reporter
 ```
 on:
   schedule:
@@ -43,10 +44,11 @@ jobs:
   check-open-prs:
     runs-on: ubuntu-latest
     steps:
-      - name: Notify Slack
-        uses: babbel/stale-bot-pr-notifier@1.0.0
+      - name: Report to Slack
+        uses: babbel/stale-pr-reporter@1.0.0
         with:
           slack_webhook_url: ${{ secrets.slack_webhook_url }}
+          pr_age_in_hours: 24
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```

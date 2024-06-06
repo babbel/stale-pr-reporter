@@ -1,5 +1,5 @@
-name: Stale Bot PR Notifier
-description: GitHub Action notifies Slack about pull requests from Dependabot and Renovate that have become stale.
+name: Stale PR Reporter
+description: GitHub Action reports to Slack about pull requests from Dependabot and Renovate that have become stale.
 
 inputs:
   pr_age_in_hours:
@@ -7,51 +7,20 @@ inputs:
     required: false
     default: 48
   slack_webhook_url:
-    description: Slack webhook
+    description: The Slack webhook URL used to send messages to a Slack. This URL is provided by Slack when you create a new incoming webhook in your Slack workflows. Ensure this URL is kept secure.
     required: true
 runs:
   using: composite
 
   steps:
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.3
     - name: Fetch all the open PR's from dependabot/renovate
+      env:
+        repository: ${{ github.repository }}
+        pr_age_in_hours: ${{inputs.pr_age_in_hours}}
       shell: bash
       run: |
-        # Install jq for JSON processing
-        sudo apt-get install jq -y
-
-        # Get all the open PRs in the repository
-        PR_LIST=$(gh pr list --repo ${{github.repository}} --state open --json "number,url,createdAt,author" | jq -c '.[]' | \
-          while read pr; do
-            author=$(echo $pr | jq -r '.author.login')
-            url=$(echo $pr | jq -r '.url')
-            pr_created_at=$(echo $pr | jq -r '.createdAt')
-
-            # Calculate the age of the PR in hours
-            pr_age=$(ruby -e "require 'time'; puts (Time.now.utc - Time.parse('$pr_created_at')).to_i")
-            time_diff=$((pr_age / 3600))
-            if [[ ("$author" == "app/dependabot" || "$author" == "app/lessonnine-renovate") && "$time_diff" -gt ${{inputs.pr_age_in_hours}} ]]; then
-              echo "$url"
-            fi
-          done)
-
-          # Check if PR_LIST is empty
-          if [ -z "$PR_LIST" ]; then
-            echo "No open PRs found."
-          else
-            # Create a JSON payload file
-            jq -n \
-              --arg repository ${{github.repository}} \
-              --arg pr_list "$PR_LIST" \
-              '{
-                repository: $repository,
-                pr_list: $pr_list,
-              }' > payload.json
-          fi
-        echo "PR_LIST=$PR_LIST" >> $GITHUB_ENV
-    - name: Notify Slack
+        bash ${{ github.action_path }}/bin/script.sh
+    - name: Report to Slack
       if: ${{ env.PR_LIST != '' }}
       uses: slackapi/slack-github-action@v1
       with:
