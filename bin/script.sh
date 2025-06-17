@@ -19,7 +19,7 @@ PR_LIST=$(gh pr list --repo $repository --state open --json "number,url,createdA
     # Calculate the age of the PR in hours
     pr_age=$(( (current_unix - pr_created_at_unix) / 3600 ))
 
-    if [[ ("$author" == "app/dependabot" || "$author" == "app/lessonnine-renovate") && "$pr_age" -gt $pr_age_in_hours ]]; then
+    if [[ ("$author" == "app/dependabot" || "$author" == "app/lessonnine-renovate" || "$author" == "app/lessonnine-gatg") && "$pr_age" -gt $pr_age_in_hours ]]; then
       echo "$url"
     fi
   done)
